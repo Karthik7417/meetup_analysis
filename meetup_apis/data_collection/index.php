@@ -2,15 +2,57 @@
 
 require 'meetup.php';
 
+$cookie = 'cookies.txt';
+
+$curloptions = array(
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6',
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_COOKIEJAR => $cookie,
+        CURLOPT_COOKIEFILE => $cookie,
+        CURLOPT_REFERER => 'http://www.meetup.com/'
+);
+
+// set userinfo
+$username = '';
+$password = '';
+
+
+// clear cookie.txt (fresh session)
+$handle = fopen($cookie, 'w');
+fclose($handle);
+
+// make a dummy request to generate a session
+curl_http_request('https://secure.meetup.com/login/', $curloptions);
+
+// login
+curl_http_request('https://secure.meetup.com/login/', 
+    array(
+        CURLOPT_POSTFIELDS => 'email=' . urlencode($username) . '&password=' . urlencode($password) . '&rememberme=on&submitButton=Login&returnUri=http%3A%2F%2Fwww.meetup.com%2F&op=login',
+        CURLOPT_POST => TRUE
+    ), $curloptions
+);
+
+function curl_http_request ($url, $moreoptions = array(), $options = array())
+{
+    foreach ($moreoptions as $k => $v) $options[$k] = $v;
+    $handle = curl_init($url);
+    curl_setopt_array($handle, $options);
+    ob_start();
+    $buffer = curl_exec($handle);
+    ob_end_clean();
+    curl_close($handle);
+    return $buffer;
+}
+
 if( !isset($_GET['code']) )
 {
     //authorize and go back to URI w/ code
     $meetup = new Meetup();
     $meetup->authorize(array(
-        'client_id'     => 't97l196jncae6ljsgvejukp5b8',
-        'redirect_uri'  => 'http://meetup.myeonglee.com',  
-        // "client_id"     => '27rl5urk95fgd40ehavhp4jhid',
-        // "redirect_uri"  => 'http://myeonglee.com/meetup2',    
+        // 'client_id'     => 't97l196jncae6ljsgvejukp5b8',
+        //'redirect_uri'  => 'http://meetup.myeonglee.com',  
+        "client_id"     => '27rl5urk95fgd40ehavhp4jhid',
+        "redirect_uri"  => 'http://myeonglee.com/meetup2',    
         )
     );
 }
@@ -19,12 +61,12 @@ else
     //assuming we came back here...
     $meetup = new Meetup(
         array(
-            "client_id"     => 't97l196jncae6ljsgvejukp5b8',
-            "client_secret" => 'ma98kbnuerp7fkhpcapo2eg56q',
-            "redirect_uri"  => 'http://meetup.myeonglee.com',
-            // "client_id"     => '27rl5urk95fgd40ehavhp4jhid',
-            // "client_secret" => 'l6mr9ga1u62mgk8emfn3u8s0k9',
-            // "redirect_uri"  => 'http://myeonglee.com/meetup2',
+            // "client_id"     => 't97l196jncae6ljsgvejukp5b8',
+            // "client_secret" => 'ma98kbnuerp7fkhpcapo2eg56q',
+            //"redirect_uri"  => 'http://meetup.myeonglee.com',
+            "client_id"     => '27rl5urk95fgd40ehavhp4jhid',
+            "client_secret" => 'l6mr9ga1u62mgk8emfn3u8s0k9',
+            "redirect_uri"  => 'http://myeonglee.com/meetup2',
             "code"          => $_GET['code'], //passed back to us from meetup
         )
     );
@@ -47,59 +89,59 @@ else
      $_SESSION['expires'] = time() + intval($response->expires_in); //use if >= intval($_SESSION['expires']) to check
 
          
-/* Get events from each city */
-    echo getEvents($meetup, 'PA', 'Pittsburgh', 'US');
-    echo getEvents($meetup, 'MD', 'Baltimore', 'US');
-    echo getEvents($meetup, 'NY', 'New York', 'US');
-    echo getEvents($meetup, 'MA', 'Boston', 'US');
+// /* Get events from each city */
+//     echo getEvents($meetup, 'PA', 'Pittsburgh', 'US');
+//     echo getEvents($meetup, 'MD', 'Baltimore', 'US');
+//     echo getEvents($meetup, 'NY', 'New York', 'US');
+//     echo getEvents($meetup, 'MA', 'Boston', 'US');
 
 
- // Searching for Groups in each city 
-    echo getGroups($meetup, 'PA', 'Pittsburgh', 'US');
-    echo getGroups($meetup, 'MD', 'Baltimore', 'US');
-    echo getGroups($meetup, 'NY', 'New York', 'US');
-    echo getGroups($meetup, 'MA', 'Boston', 'US');
+//  Searching for Groups in each city 
+//     echo getGroups($meetup, 'PA', 'Pittsburgh', 'US');
+//     echo getGroups($meetup, 'MD', 'Baltimore', 'US');
+//     echo getGroups($meetup, 'NY', 'New York', 'US');
+//     echo getGroups($meetup, 'MA', 'Boston', 'US');
     
-    echo getTopicCategory($meetup);
-    echo getTopic($meetup);
+    // echo getTopicCategory($meetup);
+//     echo getTopic($meetup);
 
 /* Pulling RSVP data from Event IDs */
-//     $event_ids = array();
-//     $file = fopen("data/neigh_id.csv","r");
-//     //$file = fopen("data/test.csv","r");
-//     $i = 0;
+    $event_ids = array();
+    $file = fopen("data/neigh_id.csv","r");
+    //$file = fopen("data/test.csv","r");
+    $i = 0;
 
-//     while(!feof($file))
-//     {
-//         $event_ids[$i] = fgetcsv($file)[0];
-//         $i += 1;
-//     }
+    while(!feof($file))
+    {
+        $event_ids[$i] = fgetcsv($file)[0];
+        $i += 1;
+    }
 
-//     fclose($file);    
-//     $i = 0;
-//     $round = 0;
-//     $chunk = '';
-//     print('Size: ' . strval(sizeof($event_ids)) . '</br>');
-//     // print_r($event_ids);
+    fclose($file);    
+    $i = 0;
+    $round = 0;
+    $chunk = '';
+    print('Size: ' . strval(sizeof($event_ids)) . '</br>');
+    // print_r($event_ids);
 
-// /* Get RSVP data for a give event ID */
-//     for ($i=0; $i<sizeof($event_ids); $i++) {
-//         $chunk .= strval($event_ids[$i]);
+/* Get RSVP data for a give event ID */
+    for ($i=0; $i<sizeof($event_ids); $i++) {
+        $chunk .= strval($event_ids[$i]);
 
-//         if ($i!=0 && $i % 100 == 0) {            
-//             echo getRSVPs($meetup, $chunk, $round);            
-//             $chunk = '';
-//             $round += 1;
+        if ($i!=0 && $i % 100 == 0) {            
+            echo getRSVPs($meetup, $chunk, $round);            
+            $chunk = '';
+            $round += 1;
             
-//         } elseif ($i == sizeof($event_ids) - 1) {            
-//             echo getRSVPs($meetup, $chunk, $round);            
-//             $chunk = '';
-//             $round += 1;
+        } elseif ($i == sizeof($event_ids) - 1) {            
+            echo getRSVPs($meetup, $chunk, $round);            
+            $chunk = '';
+            $round += 1;
                       
-//         } else {
-//             $chunk .= ',';             
-//         }        
-//     } 
+        } else {
+            $chunk .= ',';             
+        }        
+    } 
     
 /*
 	foreach ($response->results as $event) 
@@ -112,6 +154,8 @@ else
 	}
 */
 }
+
+
 
 function getRSVPs($meetup, $eids, $round){
     $output = array();    
@@ -128,7 +172,7 @@ function getRSVPs($meetup, $eids, $round){
     }
 
     $total_count = $response->meta->total_count;
-    print (strval($round) . ' round: ');
+    print ('<br>' . strval($round) . ' round: ');
 
     while ($meetup->hasNext() != null){
         if ($response->meta->next == '') break;
@@ -144,9 +188,10 @@ function getRSVPs($meetup, $eids, $round){
     $file_index += 1;
     sleep(1);
 
+
     getMembersReady($meetup, $output, $round);
         
-    $fp = fopen('RSVP_' . date('Y-m-d') . '_' . strval($round) . '.csv', 'w');
+    $fp = fopen('rsvp/RSVP_' . date('Y-m-d') . '_' . strval($round) . '.csv', 'w');
     foreach ($output as $row){        
         fputcsv($fp, $row);  
     }
@@ -190,6 +235,40 @@ function getMembersReady($meetup, $mids, $rsvpround){
     
 }
 
+function getProfiles($meetup, $mids, $round, $rsvpround){
+    $output = array();
+    $total_count = 0;
+
+    $response = $meetup->getProfiles(array(
+        'member_id' => $mids,
+    ));
+    $file_index = 0;
+
+    // total number of items matching the get request
+    $total_count = $response->meta->total_count;
+    $json_format = json_encode($response);
+
+    $fp = fopen('profile/Profiles_' . date('Y-m-d') . '_' . strval($rsvpround) .'_' . strval($round) 
+                . '_' . strval($file_index) .'.json', 'w');
+    fwrite($fp, $json_format);
+    fclose($fp);
+    sleep(1);
+
+    while ($meetup->hasNext() != null){
+        if ($response->meta->next == '') break;
+        $response = $meetup->getNext($response);
+        $json_format = json_encode($response);
+        $file_index += 1;
+        $fp = fopen('profile/Profiles_' . date('Y-m-d') . '_' . strval($rsvpround) .'_' . strval($round)
+                 . '_' . strval($file_index) .'.json', 'w');
+        fwrite($fp, $json_format);
+        fclose($fp);
+        sleep(1);
+    }
+
+    return $total_count . ' profiles pulled from ' . $rsvpround . '-' . $round. ' round<br>';
+}
+
 function getMembers($meetup, $mids, $round, $rsvpround){
     $output = array();    
     $total_count = 0;
@@ -197,21 +276,27 @@ function getMembers($meetup, $mids, $round, $rsvpround){
     $response = $meetup->getMembers(array(
         'member_id' => $mids,                   
     ));  
+    $file_index = 0;
     $total_count = $response->meta->total_count;
+    $json_format = json_encode($response);
 
-    foreach ($response->results as $item){       
-        $str = $item->id . ',' . $item->city . ',' . $item->state . ',' . $item->lat . ',' . 
-                        $item->lon;        
-        $output[$item->id][] = $str;            
+    $fp = fopen('member/Members_' . date('Y-m-d') . '_' . strval($rsvpround) .'_' . strval($round) 
+                . '_' . strval($file_index) .'.json', 'w');
+    fwrite($fp, $json_format);
+    fclose($fp);
+    sleep(1);
+
+    while ($meetup->hasNext() != null){
+        if ($response->meta->next == '') break;
+        $response = $meetup->getNext($response);
+        $json_format = json_encode($response);
+        $file_index += 1;
+        $fp = fopen('member/Members_' . date('Y-m-d') . '_' . strval($rsvpround) .'_' . strval($round)
+                 . '_' . strval($file_index) .'.json', 'w');
+        fwrite($fp, $json_format);
+        fclose($fp);
+        sleep(1);
     }
-
-    $fp = fopen('Members_' . date('Y-m-d') . '_' . strval($rsvpround) . '_' . strval($round) . 
-            '.csv', 'w');
-
-    foreach ($output as $row){        
-        fputcsv($fp, $row);  
-    }
-    fclose($fp);   
     return $total_count . ' Members pulled from ' . $rsvpround . '-' . $round. ' round<br>';
 
 }
