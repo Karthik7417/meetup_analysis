@@ -9,7 +9,7 @@ Analysis scripts will be continuously updated as the project develops.
 The "Results" folder is empty, and this folder is for storing outputs that are generated from R and Python scripts.
 
 ## Data Analysis Plan
-0. Before starting the processing, the main data files are available at this Google Drive link (because the file size, they cannot be uploaded to Github): https://drive.google.com/open?id=0B-ByxmArDTSuVW52LW1ybDV6N0E
+0. Before starting the processing, the main data files are available at this Google Drive link (because the file size, they cannot be uploaded to Github). You need to access this folder using your UMD account, but not other Gmail accounts: https://drive.google.com/open?id=0B-ByxmArDTSuVW52LW1ybDV6N0E
 1. There is "based_on_relevant_score.csv" file in the "results" folder. This file contains a list of tags that will be used for selecting MeetUp groups. From the "group_results.csv" file that contains all the group information from the 8-month period, select all the groups that has at least one of the tags from the "based_on_relevant_score.csv" file. Save the result in a "filtered_groups.csv" file. 
 2. Each group has a unique "group_id" in the filtered group table. Use the "group_id" to filter events from the "events_results.csv" file. Save the result as "filtered_events.csv".
 3. GID is unique for both time and group (while group_id is unique for only group). For each record in the "filtered_groups.csv", provide topics by running topic modeling for the "description" field, and add the topics in a new column called "topics".
