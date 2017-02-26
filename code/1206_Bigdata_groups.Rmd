@@ -121,10 +121,24 @@ mt$IsBigData = ifelse(mt$ChiSqP<0.05,1,0)
 write.csv(mt,"/Users/myeong/git/meetup_data/results/BigDataFinal_ds.csv",row.names=F,na="")
 ```
 
+# Post-Step 2 Analysis: Calculating Relevance Score and Selecting Terms based on 50% criterion
+```{r}
+set_b <- read_delim("/Users/myeong/git/meetup_data/results/BigDataFinal_ds.csv", delim = ",",col_names = TRUE ) 
+set_b$relevance <- apply(set_b, 1, function(x) as.numeric(x["co-occur"]) / as.numeric(x["groups_with_tag"]) )
+set_b <- set_b[(set_b$relevance >= 0.5 & set_b$IsBigData==1),]
+write.csv(set_b,"/Users/myeong/git/meetup_data/results/based_on_relevant_score.csv",row.names=F,na="")
+```
 
 
+
+# Step 3: we collect data about groups who chose any seed tag or any tag from [Set B] to describe themselves
 
 ```{r}
+set_c <- read_delim("/Users/myeong/git/meetup_data/results/based_on_relevant_score.csv", delim = ",",col_names = TRUE ) 
+
+search_tags <- set_c$tag
+
+
 # myReader <- readTabular(mapping=list(content="description", id="GID"))
 # tm <- VCorpus(DataframeSource(data_groups), readerControl=list(reader=myReader))
 # tm <-tm_map(tm,content_transformer(tolower))
