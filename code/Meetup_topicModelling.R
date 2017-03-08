@@ -59,7 +59,7 @@ filtered_groups$topic_no <- ldaOut.topics[,1]
 for(i in 1:nrow(filtered_groups)){
    filtered_groups$topics[i] <- paste(terms(ldaOut,10)[,filtered_groups$topic_no[i]],collapse = ", ")
 }
-write.csv(filtered_groups[,-10], file = "filtered_groups_tm.csv", row.names = F)
+write.csv(filtered_groups, file = "filtered_groups_tm.csv", row.names = F)
 
 
 filtered_events$description <- gsub("<.*?>","", filtered_events$description)
@@ -103,4 +103,4 @@ filtered_events$topic_no <- ldaOut.topics[,1]
 for(i in 1:nrow(filtered_events)){
    filtered_events$topics[i] <- paste(terms(ldaOut,10)[,filtered_events$topic_no[i]],collapse = ", ")
 }
-write.csv(filtered_events[,-9], file = "filtered_events_tm.csv", row.names = F)
+write.csv(filtered_events, file = "filtered_events_tm.csv", row.names = F)
