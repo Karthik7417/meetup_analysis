@@ -117,7 +117,7 @@ nstart <- 5
 best <- T
 
 #Setting number of topics
-k <- 11
+k <- 7
 
 ldaOut <-LDA(dtm,k, method='Gibbs', control=list(nstart=nstart, seed = seed, best=best, burnin = burnin, iter = iter, thin=thin))
 
